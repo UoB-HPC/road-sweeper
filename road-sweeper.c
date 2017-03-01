@@ -2,6 +2,7 @@
 #include "comms.h"
 #include <mpi.h>
 #include "options.h"
+#include "serialsweep.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,6 +61,7 @@ int main(int argc, char *argv[]) {
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
   }
 
+  serial_sweep(mpi, opt);
 
 
   MPI_Finalize();
