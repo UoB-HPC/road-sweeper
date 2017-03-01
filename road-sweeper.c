@@ -66,8 +66,15 @@ int main(int argc, char *argv[]) {
     printf("\n");
   }
 
+  double tick = MPI_Wtime();
+
   serial_sweep(mpi, opt);
 
+  double tock = MPI_Wtime();
+
+  if (mpi.rank == 0) {
+    printf("Serial sweep: %11.6lf s\n", tock-tick);
+  }
 
   MPI_Finalize();
 
