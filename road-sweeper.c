@@ -1,22 +1,25 @@
 
+#include "comms.h"
+#include <mpi.h>
 #include <stdio.h>
 
-#include <mpi.h>
 
 int main(int argc, char *argv[]) {
 
-  int mpi_thread_support;
+  /* Structure to hold MPI status */
+  mpistate mpi;
 
-  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &mpi_thread_support);
+  /* Initilise MPI, requesting the highest thread support possible */
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &mpi.thread_support);
 
-  int rank, nprocs;
+  /* Get MPI rank */
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi.rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi.nprocs);
 
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
-  if (rank == 0) {
+  /* Print MPI thread support */
+  if (mpi.rank == 0) {
     printf("MPI thread support: ");
-    switch (mpi_thread_support) {
+    switch (mpi.thread_support) {
       case MPI_THREAD_SINGLE:
         printf("MPI_THREAD_SINGLE\n");
         break;
