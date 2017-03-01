@@ -20,7 +20,7 @@ void serial_sweep(mpistate mpi, options opt) {
       for (int i = 0; i < 2; i++) {
 
         /* Loop over messages to send per octant */
-        for (int m = 0; m < opt.msgs; m++) {
+        for (int c = 0; c < opt.nchunks; c++) {
 
           /* Receive payload from upwind neighbours */
           if (j == 0) {
@@ -57,7 +57,7 @@ void serial_sweep(mpistate mpi, options opt) {
             MPI_Isend(zbuf, zcount, MPI_DOUBLE, mpi.zhi, 0, MPI_COMM_WORLD, req+1);
           }
 
-        } /* End msgs loop */
+        } /* End nchunks loop */
       } /* End i loop */
     } /* End j loop */
   } /* End k loop */

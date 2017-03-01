@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   /* Structure to hold runtime options - set defaults */
   options opt = {
     .N = 16,
-    .msgs = 1
+    .nchunks = 1
   };
 
   parse_args(mpi, argc, argv, &opt);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     printf("MPI processes: %d\n", mpi.nprocs);
     printf("Mesh extent: %d\n", opt.N);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
-    printf("Messages per octant: %d\n", opt.msgs);
+    printf("Chunks per octant: %d\n", opt.nchunks);
     printf("\n");
   }
 
@@ -85,14 +85,14 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     if (strcmp(argv[i], "--mesh") == 0) {
       opt->N = atoi(argv[++i]);
     }
-    else if (strcmp(argv[i], "--msgs") == 0) {
-      opt->msgs = atoi(argv[++i]);
+    else if (strcmp(argv[i], "--nchunks") == 0) {
+      opt->nchunks = atoi(argv[++i]);
     }
     else if (strcmp(argv[i], "--help") == 0) {
       if (mpi.rank == 0) {
         printf("Usage: %s [OPTIONS]\n", argv[0]);
         printf("\t--mesh  N\tSet number of cells in each mesh dimension\n");
-        printf("\t--msgs  N\tSet number of messages to send per octant\n");
+        printf("\t--nchunks  N\tSet number of chunks per octant\n");
       }
       /* Exit nicely */
       MPI_Finalize();
