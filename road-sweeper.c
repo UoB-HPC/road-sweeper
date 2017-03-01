@@ -26,7 +26,6 @@ int main(int argc, char *argv[]) {
   /* Structure to hold runtime options - set defaults */
   options opt = {
     .N = 16,
-    .chunk = 1,
     .msgs = 1
   };
 
@@ -85,9 +84,6 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     if (strcmp(argv[i], "--mesh") == 0) {
       opt->N = atoi(argv[++i]);
     }
-    else if (strcmp(argv[i], "--chunk") == 0) {
-      opt->chunk = atoi(argv[++i]);
-    }
     else if (strcmp(argv[i], "--msgs") == 0) {
       opt->msgs = atoi(argv[++i]);
     }
@@ -95,7 +91,6 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
       if (mpi.rank == 0) {
         printf("Usage: %s [OPTIONS]\n", argv[0]);
         printf("\t--mesh  N\tSet number of cells in each mesh dimension\n");
-        printf("\t--chunk C\tSet chunk size for x-dimension\n");
         printf("\t--msgs  N\tSet number of messages to send per octant\n");
       }
       /* Exit nicely */
