@@ -1,9 +1,14 @@
 
 #include "comms.h"
 #include <mpi.h>
+#include "options.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define VERSION "0.0"
+
+void parse_args(mpistate mpi, int argc, char *argv[], options *opt);
 
 int main(int argc, char *argv[]) {
 
@@ -16,6 +21,13 @@ int main(int argc, char *argv[]) {
   /* Get MPI rank */
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi.rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi.nprocs);
+
+  /* Structure to hold runtime options - set defaults */
+  options opt = {
+    .N = 16
+  };
+
+  parse_args(mpi, argc, argv, &opt);
 
   /* Print MPI thread support */
   if (mpi.rank == 0) {
@@ -37,10 +49,34 @@ int main(int argc, char *argv[]) {
         printf("MPI_THREAD_MULTIPLE\n");
         break;
     }
-
   }
+
+  printf("%d\n", opt.N);
 
   MPI_Finalize();
 
+}
+
+void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "--mesh") == 0) {
+      opt->N = atoi(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--help") == 0) {
+      if (mpi.rank == 0) {
+        printf("Usage: %s [OPTIONS]\n", argv[0]);
+        printf("\t--mesh N\tSet number of cells in each mesh dimension\n");
+      }
+      /* Exit nicely */
+      MPI_Finalize();
+      exit(EXIT_SUCCESS);
+    }
+    else {
+      if (mpi.rank == 0) {
+        printf("Unknown option: %s\n", argv[i]);
+        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+      }
+    }
+  }
 }
 
