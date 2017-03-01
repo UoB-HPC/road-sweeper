@@ -4,8 +4,11 @@ default: road-sweeper
 MPICC = mpicc
 CFLAGS = -O3
 
-road-sweeper: road-sweeper.c comms.h options.h
-	$(MPICC) $(CFLAGS) road-sweeper.c -o $@
+SRC = road-sweeper.c comms.c serialsweep.c
+HEADER = options.h comms.h serialsweep.h
+
+road-sweeper: $(SRC) $(HEADER)
+	$(MPICC) $(CFLAGS) $(SRC) -o $@
 
 .PHONY: clean
 clean:
