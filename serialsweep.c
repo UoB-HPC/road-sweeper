@@ -1,4 +1,5 @@
 
+#include "compute.h"
 #include <mpi.h>
 #include "serialsweep.h"
 
@@ -35,7 +36,7 @@ void serial_sweep(mpistate mpi, options opt) {
 
         /* Do work */
         printf("Rank %d starting\n", mpi.rank);
-        sleep(5);
+        compute();
 
         /* Send payload to downwind neighbours */
         MPI_Waitall(2, req, MPI_STATUS_IGNORE);
