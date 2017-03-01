@@ -50,7 +50,16 @@ int main(int argc, char *argv[]) {
         printf("MPI_THREAD_MULTIPLE\n");
         break;
     }
+
+    printf("MPI processes: %d\n", mpi.nprocs);
   }
+
+  /* Perform 2D decomposition */
+  decompose(&mpi, opt);
+  if (mpi.rank == 0) {
+    printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
+  }
+
 
 
   MPI_Finalize();
