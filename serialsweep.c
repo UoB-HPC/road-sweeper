@@ -37,8 +37,7 @@ void serial_sweep(mpistate mpi, options opt) {
             MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zlo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
           }
 
-          /* Do work */
-          printf("Rank %d starting\n", mpi.rank);
+          /* Do "work" */
           compute();
 
           /* Send payload to downwind neighbours */
