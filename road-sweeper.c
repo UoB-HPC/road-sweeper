@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include <stdio.h>
 
+#define VERSION "0.0"
 
 int main(int argc, char *argv[]) {
 
@@ -18,6 +19,9 @@ int main(int argc, char *argv[]) {
 
   /* Print MPI thread support */
   if (mpi.rank == 0) {
+    printf("Road Sweeper\n");
+    printf("Version: %s\n", VERSION);
+
     printf("MPI thread support: ");
     switch (mpi.thread_support) {
       case MPI_THREAD_SINGLE:
