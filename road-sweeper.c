@@ -53,13 +53,17 @@ int main(int argc, char *argv[]) {
         break;
     }
 
-    printf("MPI processes: %d\n", mpi.nprocs);
   }
 
   /* Perform 2D decomposition */
   decompose(&mpi, opt);
+
+  /* Print runtime options */
   if (mpi.rank == 0) {
+    printf("MPI processes: %d\n", mpi.nprocs);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
+    printf("Messages per octant: %d\n", opt.msgs);
+    printf("\n");
   }
 
   serial_sweep(mpi, opt);
