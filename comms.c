@@ -37,7 +37,6 @@ void decompose(mpistate *mpi, options opt) {
   mpi->ylo = (mpi->y == 0) ? MPI_PROC_NULL : (mpi->y-1) + mpi->z*mpi->npey;
   mpi->yhi = (mpi->y == mpi->npey-1) ? MPI_PROC_NULL : (mpi->y+1) + mpi->z*mpi->npey;
   mpi->zlo = (mpi->z == 0) ? MPI_PROC_NULL : mpi->y + (mpi->z-1)*mpi->npey;
-  mpi->zlo = (mpi->z == mpi->npez-1) ? MPI_PROC_NULL : mpi->y + (mpi->z+1)*mpi->npey;
-
+  mpi->zhi = (mpi->z == mpi->npez-1) ? MPI_PROC_NULL : mpi->y + (mpi->z+1)*mpi->npey;
 }
 
