@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
   /* Print runtime options */
   if (mpi.rank == 0) {
     printf("MPI processes: %d\n", mpi.nprocs);
+    printf("Mesh extent: %d\n", opt.N);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
     printf("Messages per octant: %d\n", opt.msgs);
     printf("\n");
