@@ -13,5 +13,8 @@ typedef struct options {
   /* Chunk size */
   int chunk;
 
+  /* Number of messages to send per octant - somewhat equivalent to number of chunks */
+  int msgs;
+
 }  options;
 
