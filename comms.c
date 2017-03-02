@@ -2,6 +2,7 @@
 #include "comms.h"
 #include <float.h>
 #include <mpi.h>
+#include <stdlib.h>
 
 void decompose(mpistate *mpi) {
 
@@ -38,5 +39,16 @@ void decompose(mpistate *mpi) {
   mpi->yhi = (mpi->y == mpi->npey-1) ? MPI_PROC_NULL : (mpi->y+1) + mpi->z*mpi->npey;
   mpi->zlo = (mpi->z == 0) ? MPI_PROC_NULL : mpi->y + (mpi->z-1)*mpi->npey;
   mpi->zhi = (mpi->z == mpi->npez-1) ? MPI_PROC_NULL : mpi->y + (mpi->z+1)*mpi->npey;
+}
+
+/* Allocate the MPI message buffers */
+void alloc_messages(messages *message, const options opt) {
+  message->sbuf = malloc(sizeof(double)*opt.msglen);
+  message->rbuf = malloc(sizeof(double)*opt.msglen);
+}
+
+void free_messages(messages *message) {
+  free(message->sbuf);
+  free(message->rbuf);
 }
 

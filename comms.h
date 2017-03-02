@@ -34,5 +34,15 @@ typedef struct mpistate {
 
 } mpistate;
 
+typedef struct messages {
+
+  /* Message buffers */
+  double *sbuf;
+  double *rbuf;
+
+} messages;
+
 void decompose(mpistate *mpi);
+void alloc_messages(messages *message, const options opt);
+void free_messages(messages *message);
 
