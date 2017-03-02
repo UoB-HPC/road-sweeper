@@ -45,6 +45,7 @@ timings serial_sweep(mpistate mpi, options opt) {
           for (int c = 0; c < opt.nchunks; c++) {
 
             /* Receive payload from upwind neighbours */
+            double comtime = MPI_Wtime();
             if (j == 0) {
               MPI_Recv(ybuf, ycount, MPI_DOUBLE, mpi.yhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
@@ -58,6 +59,7 @@ timings serial_sweep(mpistate mpi, options opt) {
             else {
               MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zlo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
+            time.comms += MPI_Wtime() - comtime;
 
             /* Do proportional "work" */
             for (int w = 0; w < opt.nang*opt.chunklen*opt.ny*opt.nz; w++) {
@@ -65,6 +67,7 @@ timings serial_sweep(mpistate mpi, options opt) {
             }
 
             /* Send payload to downwind neighbours */
+            comtime = MPI_Wtime();
             MPI_Waitall(2, req, MPI_STATUS_IGNORE);
 
             if (j == 0) {
@@ -80,6 +83,7 @@ timings serial_sweep(mpistate mpi, options opt) {
             else {
               MPI_Isend(zbuf, zcount, MPI_DOUBLE, mpi.zhi, 0, MPI_COMM_WORLD, req+1);
             }
+            time.comms += MPI_Wtime() - comtime;
 
           } /* End nchunks loop */
         } /* End ng loop */
