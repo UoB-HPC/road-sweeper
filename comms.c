@@ -43,12 +43,12 @@ void decompose(mpistate *mpi) {
 
 /* Allocate the MPI message buffers */
 void alloc_messages(messages *message, const options opt) {
-  message->sbuf = malloc(sizeof(double)*opt.msglen);
-  message->rbuf = malloc(sizeof(double)*opt.msglen);
+  message->ybuf = malloc(sizeof(double)*opt.msglen);
+  message->zbuf = malloc(sizeof(double)*opt.msglen);
 }
 
 void free_messages(messages *message) {
-  free(message->sbuf);
-  free(message->rbuf);
+  free(message->ybuf);
+  free(message->zbuf);
 }
 

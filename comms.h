@@ -37,8 +37,8 @@ typedef struct mpistate {
 typedef struct messages {
 
   /* Message buffers */
-  double *sbuf;
-  double *rbuf;
+  double *ybuf;
+  double *zbuf;
 
 } messages;
 
