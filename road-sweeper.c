@@ -73,22 +73,15 @@ int main(int argc, char *argv[]) {
     printf("\n");
   }
 
-  /* Allocate message buffers */
-  messages message;
-  alloc_messages(&message, opt);
-
   double tick = MPI_Wtime();
 
-  serial_sweep(mpi, opt, message);
+  serial_sweep(mpi, opt);
 
   double tock = MPI_Wtime();
 
   if (mpi.rank == 0) {
     printf("Serial sweep: %11.6lf s\n", tock-tick);
   }
-
-  /* Free MPI buffers */
-  free_messages(&message);
 
   MPI_Finalize();
 

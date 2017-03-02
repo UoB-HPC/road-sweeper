@@ -41,15 +41,3 @@ void decompose(mpistate *mpi) {
   mpi->zhi = (mpi->z == mpi->npez-1) ? MPI_PROC_NULL : mpi->y + (mpi->z+1)*mpi->npey;
 }
 
-/* Allocate the MPI message buffers */
-void alloc_messages(messages *message, const options opt) {
-  message->size = opt.nang*opt.pencil*opt.chunklen;
-  message->ybuf = malloc(sizeof(double)*message->size);
-  message->zbuf = malloc(sizeof(double)*message->size);
-}
-
-void free_messages(messages *message) {
-  free(message->ybuf);
-  free(message->zbuf);
-}
-
