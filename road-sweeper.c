@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
   if (mpi.rank == 0) {
     printf("Road Sweeper\n");
     printf("Version: %s\n", VERSION);
+    printf("\n");
 
     printf("MPI thread support: ");
     switch (mpi.thread_support) {
@@ -73,6 +74,7 @@ int main(int argc, char *argv[]) {
     printf("Cells per chunk: %d\n", opt.chunklen);
     printf("Number of angles: %d\n", opt.nang);
     printf("Number of energy groups: %d\n", opt.ng);
+    printf("====================\n");
     printf("\n");
   }
 
