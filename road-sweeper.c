@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   options opt = {
     .N = 16,
     .nchunks = 1,
-    work = 0.1
+    .work = 0.1
   };
 
   parse_args(mpi, argc, argv, &opt);
