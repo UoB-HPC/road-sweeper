@@ -1,13 +1,9 @@
 
 #include <mpi.h>
 
-#ifndef LOAD
-#define LOAD 0.1
-#endif
-
-void compute(void) {
+void compute(const double load) {
   /* Spin until enough time has passed */
   double start = MPI_Wtime();
-  while (MPI_Wtime() - start < LOAD) {}
+  while (MPI_Wtime() - start < load) {}
 }
 

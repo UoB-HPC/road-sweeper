@@ -38,7 +38,7 @@ void serial_sweep(mpistate mpi, options opt) {
           }
 
           /* Do "work" */
-          compute();
+          compute(opt.work);
 
           /* Send payload to downwind neighbours */
           MPI_Waitall(2, req, MPI_STATUS_IGNORE);

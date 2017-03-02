@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
   /* Structure to hold runtime options - set defaults */
   options opt = {
     .N = 16,
-    .nchunks = 1
+    .nchunks = 1,
+    work = 0.1
   };
 
   parse_args(mpi, argc, argv, &opt);
@@ -88,11 +89,15 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     else if (strcmp(argv[i], "--nchunks") == 0) {
       opt->nchunks = atoi(argv[++i]);
     }
+    else if (strcmp(argv[i], "--work") == 0) {
+      opt->work = atof(argv[++i]);
+    }
     else if (strcmp(argv[i], "--help") == 0) {
       if (mpi.rank == 0) {
         printf("Usage: %s [OPTIONS]\n", argv[0]);
         printf("\t--mesh  N\tSet number of cells in each mesh dimension\n");
         printf("\t--nchunks  N\tSet number of chunks per octant\n");
+        printf("\t--work     t\tSpin lock for t seconds between receive and send\n");
       }
       /* Exit nicely */
       MPI_Finalize();

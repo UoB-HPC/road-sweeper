@@ -5,5 +5,5 @@
 
 #pragma once
 
-void compute(void);
+void compute(const double load);
 
