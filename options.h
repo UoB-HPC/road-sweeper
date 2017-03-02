@@ -17,7 +17,8 @@ typedef struct options {
   int chunklen;
 
   /* Pencil size - determines Y and Z dimension */
-  int pencil;
+  int ny;
+  int nz;
 
   /* Angles per cell */
   int nang;

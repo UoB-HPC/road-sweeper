@@ -28,7 +28,8 @@ int main(int argc, char *argv[]) {
     .nchunks = 1,
     .work = 0.1,
     .chunklen = 1,
-    .pencil = 1,
+    .ny = 1,
+    .nz = 1,
     .nang = 10,
     .ng = 16
   };
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]) {
   if (mpi.rank == 0) {
     printf("MPI processes: %d\n", mpi.nprocs);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
-    printf("Subdomain: %d x %d x %d\n", opt.nchunks*opt.chunklen, opt.pencil, opt.pencil);
+    printf("Subdomain: %d x %d x %d\n", opt.nchunks*opt.chunklen, opt.ny, opt.nz);
     printf("Chunks per octant: %d\n", opt.nchunks);
     printf("Cells per chunk: %d\n", opt.chunklen);
     printf("Number of angles: %d\n", opt.nang);
@@ -100,8 +101,11 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     else if (strcmp(argv[i], "--chunklen") == 0) {
       opt->chunklen = atoi(argv[++i]);
     }
-    else if (strcmp(argv[i], "--pencil") == 0) {
-      opt->pencil = atoi(argv[++i]);
+    else if (strcmp(argv[i], "--ny") == 0) {
+      opt->ny = atoi(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--nz") == 0) {
+      opt->nz = atoi(argv[++i]);
     }
     else if (strcmp(argv[i], "--nang") == 0) {
       opt->nang = atoi(argv[++i]);
@@ -115,7 +119,8 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
         printf("\t--nchunks  N\tSet number of chunks per octant\n");
         printf("\t--work     t\tSpin lock for t seconds between receive and send\n");
         printf("\t--chunklen N\tNumber of cells in x-dimension per chunk\n");
-        printf("\t--pencil   N\tPencil size in Y and Z. e.g. N=1 is a Xx1x1 pencil\n");
+        printf("\t--ny       N\tNumber of cells per subdomain in y-dimension\n");
+        printf("\t--nz       N\tNumber of cells per subdomain in z-dimension\n");
         printf("\t--nang     N\tNumber of angles per cell\n");
         printf("\t--ng       N\tNumber of energy groups\n");
       }
