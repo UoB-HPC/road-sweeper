@@ -50,8 +50,10 @@ double serial_sweep(mpistate mpi, options opt) {
               MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zlo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
 
-            /* Do "work" */
-            compute(opt.work);
+            /* Do proportional "work" */
+            for (int w = 0; w < opt.nang*opt.chunklen*opt.ny*opt.nz; w++) {
+              compute(opt.work);
+            }
 
             /* Send payload to downwind neighbours */
             MPI_Waitall(2, req, MPI_STATUS_IGNORE);
