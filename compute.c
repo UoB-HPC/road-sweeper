@@ -1,6 +1,6 @@
 
 #ifndef WORK
-#define WORK 250
+#define WORK 50
 #endif
 
 void compute(void) {
