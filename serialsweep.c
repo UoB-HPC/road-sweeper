@@ -52,7 +52,7 @@ double serial_sweep(mpistate mpi, options opt) {
 
             /* Do proportional "work" */
             for (int w = 0; w < opt.nang*opt.chunklen*opt.ny*opt.nz; w++) {
-              compute(opt.work);
+              compute();
             }
 
             /* Send payload to downwind neighbours */

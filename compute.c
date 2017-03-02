@@ -1,9 +1,12 @@
 
-#include <mpi.h>
+#ifndef WORK
+#define WORK 250
+#endif
 
-void compute(const double load) {
-  /* Spin until enough time has passed */
-  double start = MPI_Wtime();
-  while (MPI_Wtime() - start < load) {}
+void compute(void) {
+  volatile double x = 0.0;
+  for (int i = 0; i < WORK; i++) {
+    x += 1.0;
+  }
 }
 
