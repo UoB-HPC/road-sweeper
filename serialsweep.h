@@ -1,6 +1,8 @@
 
 /*
  * Vanilla serial KBA sweeper
+ * For each octant, groups are computed serially in turn.
+ * We send a message of all the angles on the face for one energy group.
  */
 
 #pragma once
