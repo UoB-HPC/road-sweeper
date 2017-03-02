@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* Perform 2D decomposition */
-  decompose(&mpi, opt);
+  decompose(&mpi);
 
   /* Print runtime options */
   if (mpi.rank == 0) {

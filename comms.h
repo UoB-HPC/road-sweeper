@@ -34,5 +34,5 @@ typedef struct mpistate {
 
 } mpistate;
 
-void decompose(mpistate *mpi, options opt);
+void decompose(mpistate *mpi);
 

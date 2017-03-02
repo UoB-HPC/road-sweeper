@@ -3,7 +3,7 @@
 #include <float.h>
 #include <mpi.h>
 
-void decompose(mpistate *mpi, options opt) {
+void decompose(mpistate *mpi) {
 
   /* Try options for decomposition - minimise perimeter to area ratio */
   double best = DBL_MAX;
@@ -17,8 +17,8 @@ void decompose(mpistate *mpi, options opt) {
     int npez = mpi->nprocs / npey;
     if (mpi->nprocs % npez) continue;
 
-    double perimeter = ((opt.N/npey) + (opt.N/npez)) * 2.0;
-    double area = (opt.N/npey) * (opt.N/npez);
+    double perimeter = ((mpi->nprocs/npey) + (mpi->nprocs/npez)) * 2.0;
+    double area = (mpi->nprocs/npey) * (mpi->nprocs/npez);
     double ratio = perimeter / area;
 
     /* Save best so far */
