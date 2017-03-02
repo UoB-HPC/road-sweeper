@@ -40,6 +40,9 @@ typedef struct messages {
   double *ybuf;
   double *zbuf;
 
+  /* Message size */
+  int size;
+
 } messages;
 
 void decompose(mpistate *mpi);
