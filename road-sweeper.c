@@ -77,14 +77,16 @@ int main(int argc, char *argv[]) {
 
   double tick = MPI_Wtime();
 
-  double time = serial_sweep(mpi, opt);
+  timings time = serial_sweep(mpi, opt);
 
   double tock = MPI_Wtime();
 
   if (mpi.rank == 0) {
     printf("Serial sweeps\n");
-    printf("  Time:       %11.6lf s\n", time);
-    printf("  + overhead: %11.6lf s\n", tock-tick-time);
+    printf("  Total:    %11.6lf s\n", tock-tick);
+    printf("  Sweeping: %11.6lf s\n", time.sweeping);
+    printf("  Setup:    %11.6lf s\n", time.setup);
+    printf("  Comms:    %11.6lf s\n", time.comms);
   }
 
   MPI_Finalize();

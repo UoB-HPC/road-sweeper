@@ -4,19 +4,28 @@
 #include <mpi.h>
 #include "options.h"
 #include <stdlib.h>
+#include "sweep.h"
 
 void init_serial_sweep(const int ycount, const int zcount, double **ybuf, double **zbuf);
 void end_serial_sweep(double *ybuf, double *zbuf);
 
 /* Perform a vanilla KBA sweep without using OpenMP threads */
-double serial_sweep(mpistate mpi, options opt) {
+timings serial_sweep(mpistate mpi, options opt) {
+
+  timings time = {
+    .sweeping = 0.0,
+    .setup = 0.0,
+    .comms = 0.0
+  };
 
   /* Message buffers */
+  time.setup = MPI_Wtime();
   const int ycount = opt.nang * opt.nz * opt.chunklen;
   const int zcount = opt.nang * opt.ny * opt.chunklen;
   double *ybuf;
   double *zbuf;
   init_serial_sweep(ycount, zcount, &ybuf, &zbuf);
+  time.setup = MPI_Wtime() - time.setup;
 
   /* Send requests */
   MPI_Request req[2] = {MPI_REQUEST_NULL, MPI_REQUEST_NULL};
@@ -81,9 +90,13 @@ double serial_sweep(mpistate mpi, options opt) {
   /* End the timer */
   double tock = MPI_Wtime();
 
+  time.sweeping = tock-tick;
+
   end_serial_sweep(ybuf, zbuf);
 
-  return tock-tick;
+  time.setup += MPI_Wtime() - tock;
+
+  return time;
 }
 
 /* Allocate MPI message buffers */
