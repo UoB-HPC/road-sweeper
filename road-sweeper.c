@@ -9,6 +9,7 @@
 
 #define VERSION "0.0"
 
+void print_timings(char *name, timings time);
 void parse_args(mpistate mpi, int argc, char *argv[], options *opt);
 
 int main(int argc, char *argv[]) {
@@ -75,23 +76,26 @@ int main(int argc, char *argv[]) {
     printf("\n");
   }
 
-  double tick = MPI_Wtime();
-
   timings time = serial_sweep(mpi, opt);
 
-  double tock = MPI_Wtime();
-
   if (mpi.rank == 0) {
-    printf("Serial sweeps\n");
-    printf("  Total:    %11.6lf s\n", tock-tick);
-    printf("  Sweeping: %11.6lf s\n", time.sweeping);
-    printf("  Setup:    %11.6lf s\n", time.setup);
-    printf("  Comms:    %11.6lf s (%.1lf%%)\n", time.comms, time.comms/time.sweeping*100.0);
-    printf("  Compute:  %11.6lf s (%.1lf%%)\n", time.sweeping-time.comms, (time.sweeping-time.comms)/time.sweeping*100.0);
+    print_timings("Serial sweeps", time);
   }
 
   MPI_Finalize();
 
+}
+
+void print_timings(char *name, timings time) {
+  printf("%s\n", name);
+  printf("  Total:       %11.6lf s\n", time.setup+time.sweeping);
+  printf("    Setup:     %11.6lf s\n", time.setup);
+  printf("    Sweeping:  %11.6lf s\n", time.sweeping);
+  printf("      Comms:   %11.6lf s (%.1lf%%)\n", time.comms, time.comms/time.sweeping*100.0);
+  double compute = time.sweeping-time.comms;
+  printf("      Compute: %11.6lf s (%.1lf%%)\n", compute, compute/time.sweeping*100.0);
+  printf("====================\n");
+  printf("\n");
 }
 
 void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
