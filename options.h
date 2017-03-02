@@ -22,5 +22,8 @@ typedef struct options {
   /* Angles per cell */
   int nang;
 
+  /* Energy groups */
+  int ng;
+
 }  options;
 
