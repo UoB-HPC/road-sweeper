@@ -9,7 +9,7 @@
 
 #define VERSION "0.0"
 
-void print_timings(char *name, timings time);
+void print_timings(timings time);
 void parse_args(mpistate mpi, int argc, char *argv[], options *opt);
 
 int main(int argc, char *argv[]) {
@@ -88,8 +88,7 @@ int main(int argc, char *argv[]) {
 
 }
 
-void print_timings(char *name, timings time) {
-  printf("%s\n", name);
+void print_timings(timings time) {
   printf("  Total:       %11.6lf s\n", time.setup+time.sweeping);
   printf("    Setup:     %11.6lf s\n", time.setup);
   printf("    Sweeping:  %11.6lf s\n", time.sweeping);
