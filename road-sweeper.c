@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
   if (mpi.rank == 0) {
     printf("MPI processes: %d\n", mpi.nprocs);
     printf("Effective mesh: %d x %d x %d\n", opt.nchunks*opt.chunklen, mpi.npey*opt.ny, mpi.npez*opt.nz);
+    printf("  Cells: %ld\n", (long)opt.nchunks*opt.chunklen*mpi.npey*opt.ny*mpi.npez*opt.nz);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
     printf("Subdomain: %d x %d x %d\n", opt.nchunks*opt.chunklen, opt.ny, opt.nz);
     printf("Chunks per octant: %d\n", opt.nchunks);
