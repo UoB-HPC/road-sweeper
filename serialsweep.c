@@ -5,14 +5,14 @@
 #include "options.h"
 #include <stdlib.h>
 
-void init_serial_sweep(int count, double **ybuf, double **zbuf);
+void init_serial_sweep(const int count, double **ybuf, double **zbuf);
 void end_serial_sweep(double *ybuf, double *zbuf);
 
 /* Perform a vanilla KBA sweep without using OpenMP threads */
 double serial_sweep(mpistate mpi, options opt) {
 
   /* Message buffers */
-  int count = opt.nang * opt.pencil * opt.chunklen;
+  const int count = opt.nang * opt.pencil * opt.chunklen;
   double *ybuf;
   double *zbuf;
   init_serial_sweep(count, &ybuf, &zbuf);
@@ -84,7 +84,7 @@ double serial_sweep(mpistate mpi, options opt) {
 }
 
 /* Allocate MPI message buffers */
-void init_serial_sweep(int count, double **ybuf, double **zbuf) {
+void init_serial_sweep(const int count, double **ybuf, double **zbuf) {
   (*ybuf) = malloc(sizeof(double)*count);
   (*zbuf) = malloc(sizeof(double)*count);
 }
