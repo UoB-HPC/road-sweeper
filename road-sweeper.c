@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 
   double tick = MPI_Wtime();
 
-  serial_sweep(mpi, opt);
+  serial_sweep(mpi, opt, message);
 
   double tock = MPI_Wtime();
 

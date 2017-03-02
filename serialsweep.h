@@ -8,5 +8,5 @@
 #include "comms.h"
 #include "options.h"
 
-void serial_sweep(mpistate mpi, options opt);
+void serial_sweep(mpistate mpi, options opt, messages msg);
 
