@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     printf("  Total:    %11.6lf s\n", tock-tick);
     printf("  Sweeping: %11.6lf s\n", time.sweeping);
     printf("  Setup:    %11.6lf s\n", time.setup);
-    printf("  Comms:    %11.6lf s\n", time.comms);
+    printf("  Comms:    %11.6lf s (%.1lf%%)\n", time.comms, time.comms/time.sweeping*100.0);
   }
 
   MPI_Finalize();
