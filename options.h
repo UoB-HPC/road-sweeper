@@ -13,5 +13,8 @@ typedef struct options {
   /* Phony compute time in seconds */
   double work;
 
+  /* Number of doubles to send per MPI communication */
+  int msglen;
+
 }  options;
 

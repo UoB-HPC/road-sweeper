@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
   /* Structure to hold runtime options - set defaults */
   options opt = {
     .nchunks = 1,
-    .work = 0.1
+    .work = 0.1,
+    .msglen = 1
   };
 
   parse_args(mpi, argc, argv, &opt);
@@ -62,6 +63,7 @@ int main(int argc, char *argv[]) {
     printf("MPI processes: %d\n", mpi.nprocs);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
     printf("Chunks per octant: %d\n", opt.nchunks);
+    printf("Message size: %d doubles\n", opt.msglen);
     printf("\n");
   }
 
@@ -87,11 +89,15 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     else if (strcmp(argv[i], "--work") == 0) {
       opt->work = atof(argv[++i]);
     }
+    else if (strcmp(argv[i], "--msglen") == 0) {
+      opt->msglen = atoi(argv[++i]);
+    }
     else if (strcmp(argv[i], "--help") == 0) {
       if (mpi.rank == 0) {
         printf("Usage: %s [OPTIONS]\n", argv[0]);
         printf("\t--nchunks N\tSet number of chunks per octant\n");
         printf("\t--work    t\tSpin lock for t seconds between receive and send\n");
+        printf("\t--msglen  N\tNumber of doubles to send per communication\n");
       }
       /* Exit nicely */
       MPI_Finalize();
