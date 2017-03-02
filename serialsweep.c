@@ -1,7 +1,8 @@
 
+#include "comms.h"
 #include "compute.h"
 #include <mpi.h>
-#include "sweep.h"
+#include "options.h"
 
 /* Perform a vanilla KBA sweep without using OpenMP threads */
 void serial_sweep(mpistate mpi, options opt, messages msg) {
