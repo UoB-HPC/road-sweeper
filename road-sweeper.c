@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
   options opt = {
     .nchunks = 1,
     .work = 0.1,
-    .msglen = 1
+    .chunklen = 1,
+    .pencil = 1
   };
 
   parse_args(mpi, argc, argv, &opt);
@@ -55,15 +56,16 @@ int main(int argc, char *argv[]) {
 
   }
 
-  /* Perform 2D decomposition */
+  /* Perform 2D decomposition in YZ */
   decompose(&mpi);
 
   /* Print runtime options */
   if (mpi.rank == 0) {
     printf("MPI processes: %d\n", mpi.nprocs);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
+    printf("Subdomain: %d x %d x %d\n", opt.nchunks*opt.chunklen, opt.pencil, opt.pencil);
     printf("Chunks per octant: %d\n", opt.nchunks);
-    printf("Message size: %d doubles\n", opt.msglen);
+    printf("Cells per chunk: %d\n", opt.chunklen);
     printf("\n");
   }
 
@@ -96,15 +98,19 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     else if (strcmp(argv[i], "--work") == 0) {
       opt->work = atof(argv[++i]);
     }
-    else if (strcmp(argv[i], "--msglen") == 0) {
-      opt->msglen = atoi(argv[++i]);
+    else if (strcmp(argv[i], "--chunklen") == 0) {
+      opt->chunklen = atoi(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--pencil") == 0) {
+      opt->pencil = atoi(argv[++i]);
     }
     else if (strcmp(argv[i], "--help") == 0) {
       if (mpi.rank == 0) {
         printf("Usage: %s [OPTIONS]\n", argv[0]);
-        printf("\t--nchunks N\tSet number of chunks per octant\n");
-        printf("\t--work    t\tSpin lock for t seconds between receive and send\n");
-        printf("\t--msglen  N\tNumber of doubles to send per communication\n");
+        printf("\t--nchunks  N\tSet number of chunks per octant\n");
+        printf("\t--work     t\tSpin lock for t seconds between receive and send\n");
+        printf("\t--chunklen N\tNumber of cells in x-dimension per chunk\n");
+        printf("\t--pencil   N\tPencil size in Y and Z. e.g. N=1 is a Xx1x1 pencil\n");
       }
       /* Exit nicely */
       MPI_Finalize();

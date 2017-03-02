@@ -13,8 +13,11 @@ typedef struct options {
   /* Phony compute time in seconds */
   double work;
 
-  /* Number of doubles to send per MPI communication */
-  int msglen;
+  /* Number of cells per chunk */
+  int chunklen;
+
+  /* Pencil size - determines Y and Z dimension */
+  int pencil;
 
 }  options;
 
