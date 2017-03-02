@@ -30,3 +30,8 @@ typedef struct timings {
  */
 timings serial_sweep(mpistate mpi, options opt);
 
+/*
+ * Parallel over groups, sending all groups in comms
+ */
+timings par_group_sweep(mpistate mpi, options opt);
+
