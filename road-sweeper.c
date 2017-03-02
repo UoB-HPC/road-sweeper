@@ -26,7 +26,6 @@ int main(int argc, char *argv[]) {
   /* Structure to hold runtime options - set defaults */
   options opt = {
     .nchunks = 1,
-    .work = 0.1,
     .chunklen = 1,
     .ny = 1,
     .nz = 1,
@@ -95,9 +94,6 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     if (strcmp(argv[i], "--nchunks") == 0) {
       opt->nchunks = atoi(argv[++i]);
     }
-    else if (strcmp(argv[i], "--work") == 0) {
-      opt->work = atof(argv[++i]);
-    }
     else if (strcmp(argv[i], "--chunklen") == 0) {
       opt->chunklen = atoi(argv[++i]);
     }
@@ -117,7 +113,6 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
       if (mpi.rank == 0) {
         printf("Usage: %s [OPTIONS]\n", argv[0]);
         printf("\t--nchunks  N\tSet number of chunks per octant\n");
-        printf("\t--work     t\tSpin lock for t seconds between receive and send\n");
         printf("\t--chunklen N\tNumber of cells in x-dimension per chunk\n");
         printf("\t--ny       N\tNumber of cells per subdomain in y-dimension\n");
         printf("\t--nz       N\tNumber of cells per subdomain in z-dimension\n");

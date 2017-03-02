@@ -10,9 +10,6 @@ typedef struct options {
   /* Number of chunks per octant */
   int nchunks;
 
-  /* Phony compute time in seconds */
-  double work;
-
   /* Number of cells per chunk */
   int chunklen;
 
