@@ -19,5 +19,8 @@ typedef struct options {
   /* Pencil size - determines Y and Z dimension */
   int pencil;
 
+  /* Angles per cell */
+  int nang;
+
 }  options;
 

@@ -28,7 +28,8 @@ int main(int argc, char *argv[]) {
     .nchunks = 1,
     .work = 0.1,
     .chunklen = 1,
-    .pencil = 1
+    .pencil = 1,
+    .nang = 10
   };
 
   parse_args(mpi, argc, argv, &opt);
@@ -66,6 +67,7 @@ int main(int argc, char *argv[]) {
     printf("Subdomain: %d x %d x %d\n", opt.nchunks*opt.chunklen, opt.pencil, opt.pencil);
     printf("Chunks per octant: %d\n", opt.nchunks);
     printf("Cells per chunk: %d\n", opt.chunklen);
+    printf("Number of angles: %d\n", opt.nang);
     printf("\n");
   }
 
@@ -104,6 +106,9 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     else if (strcmp(argv[i], "--pencil") == 0) {
       opt->pencil = atoi(argv[++i]);
     }
+    else if (strcmp(argv[i], "--nang") == 0) {
+      opt->nang = atoi(argv[++i]);
+    }
     else if (strcmp(argv[i], "--help") == 0) {
       if (mpi.rank == 0) {
         printf("Usage: %s [OPTIONS]\n", argv[0]);
@@ -111,6 +116,7 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
         printf("\t--work     t\tSpin lock for t seconds between receive and send\n");
         printf("\t--chunklen N\tNumber of cells in x-dimension per chunk\n");
         printf("\t--pencil   N\tPencil size in Y and Z. e.g. N=1 is a Xx1x1 pencil\n");
+        printf("\t--nang     N\tNumber of angles per cell\n");
       }
       /* Exit nicely */
       MPI_Finalize();
