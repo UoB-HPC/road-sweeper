@@ -23,5 +23,8 @@ typedef struct options {
   /* Energy groups */
   int ng;
 
+  /* Sweeper version */
+  int version;
+
 }  options;
 
