@@ -2,7 +2,7 @@
 #include "comms.h"
 #include <mpi.h>
 #include "options.h"
-#include "serialsweep.h"
+#include "sweep.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
