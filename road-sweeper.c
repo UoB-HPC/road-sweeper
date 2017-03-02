@@ -75,12 +75,14 @@ int main(int argc, char *argv[]) {
 
   double tick = MPI_Wtime();
 
-  serial_sweep(mpi, opt);
+  double time = serial_sweep(mpi, opt);
 
   double tock = MPI_Wtime();
 
   if (mpi.rank == 0) {
-    printf("Serial sweep: %11.6lf s\n", tock-tick);
+    printf("Serial sweeps\n");
+    printf("  Time:       %11.6lf s\n", time);
+    printf("  + overhead: %11.6lf s\n", tock-tick-time);
   }
 
   MPI_Finalize();
