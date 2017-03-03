@@ -9,7 +9,7 @@
 
 #define VERSION "0.0"
 
-enum sweep {SERIAL, PARGROUP};
+enum sweep {SERIAL, PARGROUP, PARMPI};
 
 void print_timings(timings time);
 void parse_args(mpistate mpi, int argc, char *argv[], options *opt);
@@ -79,6 +79,7 @@ int main(int argc, char *argv[]) {
     printf("====================\n");
     if (opt.version == SERIAL) printf("Running serial sweeper\n");
     else if (opt.version == PARGROUP) printf("Running parallel group sweeper\n");
+    else if (opt.version == PARMPI) printf("Running parallel MPI sweeper\n");
     printf("\n");
   }
 
@@ -88,6 +89,8 @@ int main(int argc, char *argv[]) {
     time = serial_sweep(mpi, opt);
   else if (opt.version == PARGROUP)
     time = par_group_sweep(mpi, opt);
+  else if (opt.version == PARMPI)
+    time = par_mpi_sweep(mpi, opt);
 
   if (mpi.rank == 0) {
     print_timings(time);
@@ -136,6 +139,15 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
       else if (strcmp(argv[i], "pargroup") == 0) {
         opt->version = PARGROUP;
       }
+      else if (strcmp(argv[i], "parmpi") == 0) {
+        opt->version = PARMPI;
+      }
+      else {
+        if (mpi.rank == 0) {
+        printf("Unknown sweep type: %s\n", argv[i]);
+        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+        }
+      }
     }
     else if (strcmp(argv[i], "--help") == 0) {
       if (mpi.rank == 0) {
@@ -146,7 +158,7 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
         printf("\t--nz       N\tNumber of cells per subdomain in z-dimension\n");
         printf("\t--nang     N\tNumber of angles per cell\n");
         printf("\t--ng       N\tNumber of energy groups\n");
-        printf("\t--sweep type\tSweeper to run. Options: serial, pargroup\n");
+        printf("\t--sweep type\tSweeper to run. Options: serial, pargroup, parmpi\n");
       }
       /* Exit nicely */
       MPI_Finalize();

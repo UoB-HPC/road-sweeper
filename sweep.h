@@ -35,3 +35,11 @@ timings serial_sweep(mpistate mpi, options opt);
  */
 timings par_group_sweep(mpistate mpi, options opt);
 
+/*
+ * Parallel over groups, using OpenMP threads to run
+ * individual group sweeps concurrently.
+ * This results in calling MPI from within the threaded
+ * region
+ */
+timings par_mpi_sweep(mpistate mpi, options opt);
+
