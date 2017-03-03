@@ -2,7 +2,9 @@
 #include "comms.h"
 #include "compute.h"
 #include <mpi.h>
+#include <omp.h>
 #include "options.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include "sweep.h"
 
@@ -18,17 +20,48 @@ timings par_mpi_sweep(mpistate mpi, options opt) {
     .comms = 0.0
   };
 
-  /* Message buffers */
   time.setup = MPI_Wtime();
+
+  /* Check MPI threading model is high enough */
+  if (mpi.thread_support < MPI_THREAD_SERIALIZED) {
+    if (mpi.rank == 0) {
+      printf("MPI library must support MPI_THREAD_SERIALIZED\n");
+      MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+    }
+  }
+
+  /*
+   * Need to use OpenMP locks if we are only MPI_THREAD_SERIALIZED.
+   * We must ensure only one thread calls at once, and we cannot
+   * use the if clause on a critial region, so we implement this
+   * manually with locks.
+   * Only one lock should be required
+   */
+  omp_lock_t lock;
+  if (mpi.thread_support == MPI_THREAD_SERIALIZED) {
+    omp_init_lock(&lock);
+  }
+
+  /* Message buffers */
   const int ycount = opt.nang * opt.nz * opt.chunklen;
   const int zcount = opt.nang * opt.ny * opt.chunklen;
   double *ybuf;
   double *zbuf;
-  init_par_mpi_sweep(ycount, zcount, &ybuf, &zbuf);
+  init_par_mpi_sweep(opt.ng*ycount, opt.ng*zcount, &ybuf, &zbuf);
   time.setup = MPI_Wtime() - time.setup;
 
-  /* Send requests */
-  MPI_Request req[2] = {MPI_REQUEST_NULL, MPI_REQUEST_NULL};
+  /* Send requests - 2 per thread */
+  int nthrds;
+  #pragma omp parallel
+  {
+    nthrds = omp_get_num_threads();
+  }
+  MPI_Request req[nthrds][2];
+#pragma omp parallel
+  {
+    req[omp_get_thread_num()][0] = MPI_REQUEST_NULL;
+    req[omp_get_thread_num()][1] = MPI_REQUEST_NULL;
+  }
 
   /* Start the timer */
   double tick = MPI_Wtime();
@@ -38,28 +71,48 @@ timings par_mpi_sweep(mpistate mpi, options opt) {
     for (int j = 0; j < 2; j++) {
       for (int i = 0; i < 2; i++) {
 
-        /* Loop over energy groups in par_mpi */
+        /* Loop over energy groups in parallel, setting up
+         * one concurrent sweep per group
+         */
+        #pragma omp parallel for
         for (int g = 0; g < opt.ng; g++) {
+
+          const int thrd = omp_get_thread_num();
 
           /* Loop over messages to send per octant */
           for (int c = 0; c < opt.nchunks; c++) {
 
             /* Receive payload from upwind neighbours */
             double comtime = MPI_Wtime();
+
+            /* Lock if necessary before comms */
+            if(mpi.thread_support == MPI_THREAD_SERIALIZED) {
+              omp_set_lock(&lock);
+            }
+
             if (j == 0) {
-              MPI_Recv(ybuf, ycount, MPI_DOUBLE, mpi.yhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+              MPI_Recv(ybuf+g*ycount, ycount, MPI_DOUBLE, mpi.yhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
             else {
-              MPI_Recv(ybuf, ycount, MPI_DOUBLE, mpi.ylo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+              MPI_Recv(ybuf+g*ycount, ycount, MPI_DOUBLE, mpi.ylo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
 
             if (k == 0) {
-              MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+              MPI_Recv(zbuf+g*zcount, zcount, MPI_DOUBLE, mpi.zhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
             else {
-              MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zlo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+              MPI_Recv(zbuf+g*zcount, zcount, MPI_DOUBLE, mpi.zlo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
-            time.comms += MPI_Wtime() - comtime;
+
+            /* Just time last thread */
+            if (thrd == nthrds-1) {
+              time.comms += MPI_Wtime() - comtime;
+            }
+
+            /* Unlock if necessary after comms */
+            if(mpi.thread_support == MPI_THREAD_SERIALIZED) {
+              omp_unset_lock(&lock);
+            }
 
             /* Do proportional "work" */
             for (int w = 0; w < opt.nang*opt.chunklen*opt.ny*opt.nz; w++) {
@@ -68,22 +121,37 @@ timings par_mpi_sweep(mpistate mpi, options opt) {
 
             /* Send payload to downwind neighbours */
             comtime = MPI_Wtime();
-            MPI_Waitall(2, req, MPI_STATUS_IGNORE);
+
+            /* Lock if necessary before comms */
+            if(mpi.thread_support == MPI_THREAD_SERIALIZED) {
+              omp_set_lock(&lock);
+            }
+
+            MPI_Waitall(2, req[thrd], MPI_STATUS_IGNORE);
 
             if (j == 0) {
-              MPI_Isend(ybuf, ycount, MPI_DOUBLE, mpi.ylo, 0, MPI_COMM_WORLD, req+0);
+              MPI_Isend(ybuf+g*ycount, ycount, MPI_DOUBLE, mpi.ylo, 0, MPI_COMM_WORLD, req[thrd]+0);
             }
             else {
-              MPI_Isend(ybuf, ycount, MPI_DOUBLE, mpi.yhi, 0, MPI_COMM_WORLD, req+0);
+              MPI_Isend(ybuf+g*ycount, ycount, MPI_DOUBLE, mpi.yhi, 0, MPI_COMM_WORLD, req[thrd]+0);
             }
 
             if (k == 0) {
-              MPI_Isend(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, MPI_COMM_WORLD, req+1);
+              MPI_Isend(zbuf+g*zcount, zcount, MPI_DOUBLE, mpi.zlo, 0, MPI_COMM_WORLD, req[thrd]+1);
             }
             else {
-              MPI_Isend(zbuf, zcount, MPI_DOUBLE, mpi.zhi, 0, MPI_COMM_WORLD, req+1);
+              MPI_Isend(zbuf+g*zcount, zcount, MPI_DOUBLE, mpi.zhi, 0, MPI_COMM_WORLD, req[thrd]+1);
             }
-            time.comms += MPI_Wtime() - comtime;
+
+            /* Just time last thread */
+            if (thrd == nthrds-1) {
+              time.comms += MPI_Wtime() - comtime;
+            }
+
+            /* Unlock if necessary after comms */
+            if(mpi.thread_support == MPI_THREAD_SERIALIZED) {
+              omp_unset_lock(&lock);
+            }
 
           } /* End nchunks loop */
         } /* End ng loop */
@@ -96,6 +164,10 @@ timings par_mpi_sweep(mpistate mpi, options opt) {
 
   time.sweeping = tock-tick;
 
+  /* Destroy lock */
+  if (mpi.thread_support == MPI_THREAD_SERIALIZED) {
+    omp_destroy_lock(&lock);
+  }
   end_par_mpi_sweep(ybuf, zbuf);
 
   time.setup += MPI_Wtime() - tock;
