@@ -43,3 +43,6 @@ timings par_group_sweep(mpistate mpi, options opt);
  */
 timings par_mpi_sweep(mpistate mpi, options opt);
 
+/* Same as above, but uses multiple locks - one per thread */
+timings par_mpi_multi_lock_sweep(mpistate mpi, options opt);
+
