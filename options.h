@@ -17,6 +17,10 @@ typedef struct options {
   int ny;
   int nz;
 
+  /* Global mesh size for strong scaling */
+  int gny;
+  int gnz;
+
   /* Angles per cell */
   int nang;
 
@@ -25,6 +29,9 @@ typedef struct options {
 
   /* Sweeper version */
   int version;
+
+  /* Strong scaling run? */
+  int strong;
 
 }  options;
 
