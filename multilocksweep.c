@@ -75,11 +75,10 @@ timings par_mpi_multi_lock_sweep(mpistate mpi, options opt) {
 
 
   /* Octant loops - 0 is stepping backwards, 1 is stepping forwards */
-//  for (int k = 0; k < 2; k++) {
-//    for (int j = 0; j < 2; j++) {
-//      for (int i = 0; i < 2; i++) {
-        {{{
-int i = 0; int j = 0; int k = 0;
+  for (int k = 0; k < 2; k++) {
+    for (int j = 0; j < 2; j++) {
+      for (int i = 0; i < 2; i++) {
+
         /* Loop over energy groups in parallel, setting up
          * one concurrent sweep per group
          */
