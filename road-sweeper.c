@@ -33,7 +33,8 @@ int main(int argc, char *argv[]) {
     .ny = 1,
     .nz = 1,
     .nang = 10,
-    .ng = 16
+    .ng = 16,
+    .strong = 0
   };
 
   parse_args(mpi, argc, argv, &opt);
@@ -128,6 +129,15 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
     else if (strcmp(argv[i], "--nz") == 0) {
       opt->nz = atoi(argv[++i]);
     }
+    else if (strcmp(argv[i], "--meshny") == 0) {
+      opt->gny = atoi(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--meshnz") == 0) {
+      opt->gnz = atoi(argv[++i]);
+    }
+    else if (strcmp(argv[i], "--strong") == 0) {
+      opt->strong = 1;
+    }
     else if (strcmp(argv[i], "--nang") == 0) {
       opt->nang = atoi(argv[++i]);
     }
@@ -162,6 +172,9 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
         printf("\t--chunklen N\tNumber of cells in x-dimension per chunk\n");
         printf("\t--ny       N\tNumber of cells per subdomain in y-dimension\n");
         printf("\t--nz       N\tNumber of cells per subdomain in z-dimension\n");
+        printf("\t--meshny   N\tNumber of cells in y-dimension - not compatible with ny option\n");
+        printf("\t--meshnz   N\tNumber of cells in z-dimension - not compatible with nz option\n");
+        printf("\t--strong    \tSpecify running strong scaling\n");
         printf("\t--nang     N\tNumber of angles per cell\n");
         printf("\t--ng       N\tNumber of energy groups\n");
         printf("\t--sweep type\tSweeper to run. Options: serial, pargroup, parmpi, multilock\n");
@@ -175,6 +188,14 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
         printf("Unknown option: %s\n", argv[i]);
         MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
       }
+    }
+  }
+
+  /* Validation */
+  if (opt->strong && (opt->gny < 1 || opt->gnz < 1)) {
+    if (mpi.rank == 0) {
+      printf("Must set --meshny and --meshnz with --strong option\n");
+      MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
     }
   }
 }
