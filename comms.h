@@ -35,4 +35,5 @@ typedef struct mpistate {
 } mpistate;
 
 void decompose(mpistate *mpi);
+void decompose_mesh(mpistate *mpi, options *opt);
 

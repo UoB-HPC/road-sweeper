@@ -64,13 +64,20 @@ int main(int argc, char *argv[]) {
   }
 
   /* Perform 2D decomposition in YZ */
-  decompose(&mpi);
+  if (opt.strong) {
+    decompose_mesh(&mpi, &opt);
+  }
+  else {
+    decompose(&mpi);
+    opt.gny = mpi.npey*opt.ny;
+    opt.gnz = mpi.npez*opt.nz;
+  }
 
   /* Print runtime options */
   if (mpi.rank == 0) {
     printf("MPI processes: %d\n", mpi.nprocs);
-    printf("Effective mesh: %d x %d x %d\n", opt.nchunks*opt.chunklen, mpi.npey*opt.ny, mpi.npez*opt.nz);
-    printf("  Cells: %ld\n", (long)opt.nchunks*opt.chunklen*mpi.npey*opt.ny*mpi.npez*opt.nz);
+    printf("Effective mesh: %d x %d x %d\n", opt.nchunks*opt.chunklen, opt.gny, opt.gnz);
+    printf("  Cells: %ld\n", (long)opt.nchunks*opt.chunklen*opt.gny*opt.gnz);
     printf("Decomposition: %d x %d\n", mpi.npey, mpi.npez);
     printf("Subdomain: %d x %d x %d\n", opt.nchunks*opt.chunklen, opt.ny, opt.nz);
     printf("Chunks per octant: %d\n", opt.nchunks);
