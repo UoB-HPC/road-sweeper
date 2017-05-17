@@ -147,7 +147,7 @@ void print_timings(options opt, timings *times) {
     }
   }
   printf("  Total for all sweeps %11.6lf s\n", total);
-  printf("  Minimum sweep time\n");
+  printf("  Minimum sweep time (sweep #%d)\n", min+1);
   printf("    Total:       %11.6lf s\n", times[min].setup+times[min].sweeping);
   printf("      Setup:     %11.6lf s\n", times[min].setup);
   printf("      Sweeping:  %11.6lf s\n", times[min].sweeping);
