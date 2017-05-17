@@ -28,7 +28,7 @@
 
 enum sweep {SERIAL, PARGROUP, PARMPI, MULTILOCK};
 
-void print_timings(timings time);
+void print_timings(options opt, timings *times);
 void parse_args(mpistate mpi, int argc, char *argv[], options *opt);
 
 int main(int argc, char *argv[]) {
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (mpi.rank == 0) {
-    print_timings(times[0]);
+    print_timings(opt, times);
   }
 
   free(times);
@@ -136,13 +136,24 @@ int main(int argc, char *argv[]) {
 
 }
 
-void print_timings(timings time) {
-  printf("  Total:       %11.6lf s\n", time.setup+time.sweeping);
-  printf("    Setup:     %11.6lf s\n", time.setup);
-  printf("    Sweeping:  %11.6lf s\n", time.sweeping);
-  printf("      Comms:   %11.6lf s (%.1lf%%)\n", time.comms, time.comms/time.sweeping*100.0);
-  double compute = time.sweeping-time.comms;
-  printf("      Compute: %11.6lf s (%.1lf%%)\n", compute, compute/time.sweeping*100.0);
+void print_timings(options opt, timings *times) {
+  double total = 0.0;
+  int min = 0;
+  int max = 0;
+  for (int s = 0; s < opt.nsweeps; s++) {
+    total += times[s].setup+times[s].sweeping;
+    if (times[s].sweeping < times[min].sweeping) {
+      min = s;
+    }
+  }
+  printf("  Total for all sweeps %11.6lf s\n", total);
+  printf("  Minimum sweep time\n");
+  printf("    Total:       %11.6lf s\n", times[min].setup+times[min].sweeping);
+  printf("      Setup:     %11.6lf s\n", times[min].setup);
+  printf("      Sweeping:  %11.6lf s\n", times[min].sweeping);
+  printf("        Comms:   %11.6lf s (%.1lf%%)\n", times[min].comms, times[min].comms/times[min].sweeping*100.0);
+  double compute = times[min].sweeping-times[min].comms;
+  printf("        Compute: %11.6lf s (%.1lf%%)\n", compute, compute/times[min].sweeping*100.0);
   printf("====================\n");
   printf("\n");
 }
