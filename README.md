@@ -32,7 +32,7 @@ A number of options are passed on the command line.
 | `--nz N`       | Number of cells in subdomain in z                       | 1               |
 | `--meshny N`   | Cells in global y-dimension                             | -               |
 | `--meshnz N`   | Cells in global z-dimension                             | -               |
-| `--strong      | Perform strong scaling decomposition                    | Off (i.e. weak) |
+| `--strong`     | Perform strong scaling decomposition                    | Off (i.e. weak) |
 | `--nang N`     | Number of angles per cell                               | 10              |
 | `--ng N`       | Number of groups per cell                               | 16              |
 | `--sweep type` | Sweep type (`serial`, `pargroup`, `parmpi`, `mutilock`) | `serial`        |
