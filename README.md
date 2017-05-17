@@ -77,4 +77,5 @@ This sweep has a similar regeime to the Parallel MPI sweep, however multiple Ope
 Each thread has its own lock, which begins locked other than the first thread.
 Once MPI communication is complete each thead unlocks the neighbouring lock, resulting in an ordering of the threads.
 Note that this behaviour does not conform to the OpenMP specification because locks may only be locked/unlocked by a task region, which corresponds to each thread.
+Due to the use of the `parallel for` OpenMP directive, the number of threads **must** evenly divide `ng` otherwise deadlock may occur; a possible solution is to manually workshare the loop to ensure all threads always take part in the lock protocol.
 
