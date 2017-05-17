@@ -26,7 +26,7 @@
 
 #define VERSION "0.0"
 
-enum sweep {SERIAL, PARGROUP, PARMPI, MULTILOCK};
+enum sweep {SERIAL, PARGROUP, PARMPI, MULTILOCK, ONESIDED};
 
 void print_timings(options opt, timings *times);
 void parse_args(mpistate mpi, int argc, char *argv[], options *opt);
@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
     else if (opt.version == PARGROUP) printf("Running parallel group sweeper\n");
     else if (opt.version == PARMPI) printf("Running parallel MPI sweeper\n");
     else if (opt.version == MULTILOCK) printf("Running parallel MPI sweeper (multiple locks)\n");
+    else if (opt.version == ONESIDED) printf("Running one sided sweeper\n");
     printf("\n");
   }
 
@@ -124,6 +125,8 @@ int main(int argc, char *argv[]) {
       times[s] = par_mpi_sweep(mpi, opt);
     else if (opt.version == MULTILOCK)
       times[s] = par_mpi_multi_lock_sweep(mpi, opt);
+    else if (opt.version == ONESIDED)
+      times[s] = one_sided_sweep(mpi, opt);
   }
 
   if (mpi.rank == 0) {
@@ -205,6 +208,9 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
       else if (strcmp(argv[i], "multilock") == 0) {
         opt->version = MULTILOCK;
       }
+      else if (strcmp(argv[i], "onesided") == 0) {
+        opt->version = ONESIDED;
+      }
       else {
         if (mpi.rank == 0) {
         printf("Unknown sweep type: %s\n", argv[i]);
@@ -228,7 +234,7 @@ void parse_args(mpistate mpi, int argc, char *argv[], options *opt) {
         printf("\t--strong    \tSpecify running strong scaling\n");
         printf("\t--nang     N\tNumber of angles per cell\n");
         printf("\t--ng       N\tNumber of energy groups\n");
-        printf("\t--sweep type\tSweeper to run. Options: serial, pargroup, parmpi, multilock\n");
+        printf("\t--sweep type\tSweeper to run. Options: serial, pargroup, parmpi, multilock, onesided\n");
       }
       /* Exit nicely */
       MPI_Finalize();

@@ -63,3 +63,6 @@ timings par_mpi_sweep(mpistate mpi, options opt);
 /* Same as above, but uses multiple locks - one per thread */
 timings par_mpi_multi_lock_sweep(mpistate mpi, options opt);
 
+/* One sided sweeper, with parallel groups */
+timings one_sided_sweep(mpistate mpi, options opt);
+
