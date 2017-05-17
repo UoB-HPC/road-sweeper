@@ -44,7 +44,7 @@ The number of OpenMP threads should be set via the `OMP_NUM_THREADS` environment
 By default the mesh parameters will be weak scaled (replicated) across the number of MPI ranks.
 
 ### Strong scaling
-The `--strong`` flag must be specified, along with the `--meshny` and `--meshnz` options.
+The `--strong` flag must be specified, along with the `--meshny` and `--meshnz` options.
 `--ny` and `--nz` must not be set.
 The YZ spatial domain is as evenly as possible across the number of MPI ranks.
 Each rank contains the complete X domain, and is of size `nchunks * chunklen` cells.
