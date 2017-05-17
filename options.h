@@ -24,6 +24,9 @@
 
 typedef struct options {
 
+  /* Number of sweeps to do */
+  int nsweeps;
+
   /* Number of chunks per octant */
   int nchunks;
 
