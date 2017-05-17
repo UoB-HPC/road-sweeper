@@ -8,6 +8,7 @@ This is a small benchmark code designed to investigate MPI characteristics of a 
 ## Building
 Just type `make` to produce the `road-sweeper` binary.
 The following options can be set:
+
 | Parameter  | Description                     |
 |------------|---------------------------------|
 | `MPICC`    | Set the MPI C compiler          |
@@ -17,6 +18,7 @@ The following options can be set:
 
 ## Runtime options
 A number of options are passed on the command line.
+
 | Parameter      | Description                                             | Default value   |
 |----------------|---------------------------------------------------------|-----------------|
 | `--nsweeps N`  | Number of sweeps to perform                             | 1               |
