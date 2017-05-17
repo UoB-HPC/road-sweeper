@@ -56,18 +56,18 @@ Each sweeper is allowed to allocate the required MPI message buffer sizes, and a
 
 ### Serial
 MPI only sweep with no OpenMP threading.
-One message is sent per chunk consisting of all the angles for the face cells for *a single* energy group.
+One message is sent per chunk consisting of all the angles for the face cells for **a single** energy group.
 
 ### Parallel group
 Groups are threaded with OpenMP.
-One message is sent per chunk consisting of all the angles for the face cells for *all* energy groups.
+One message is sent per chunk consisting of all the angles for the face cells for **all** energy groups.
 The group loop is inside the loop over space and so the OpenMP threads synchronise before the messages are sent.
 This is the traditional MPI+OpenMP style implementation.
 
 ### Parallel MPI
 Sweeps for each groups are threaded with OpenMP.
 This means seperate spatial sweeps are running concurrently.
-Each *thread* sends one message per chunk consisting of all the angles for the face cells for a single energy group.
+Each **thread** sends one message per chunk consisting of all the angles for the face cells for **a single** energy group.
 Where the MPI library is `MPI_THREAD_SERIALIZED`, a single OpenMP lock is used to syncronise threads.
 In the case of `MPI_THREAD_MULTIPLE` no locks are used.
 This could be described as an OpenMP+MPI implementation.
