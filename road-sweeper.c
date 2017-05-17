@@ -145,8 +145,12 @@ void print_timings(options opt, timings *times) {
     if (times[s].sweeping < times[min].sweeping) {
       min = s;
     }
+    if (times[s].sweeping > times[max].sweeping) {
+      max = s;
+    }
   }
   printf("  Total for all sweeps %11.6lf s\n", total);
+  printf("  Time variance:       %11.6lf s\n", times[max].sweeping-times[min].sweeping);
   printf("  Minimum sweep time (sweep #%d)\n", min+1);
   printf("    Total:       %11.6lf s\n", times[min].setup+times[min].sweeping);
   printf("      Setup:     %11.6lf s\n", times[min].setup);
