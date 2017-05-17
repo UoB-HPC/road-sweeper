@@ -111,20 +111,26 @@ int main(int argc, char *argv[]) {
     printf("\n");
   }
 
-  timings time;
+  timings *times = malloc(opt.nsweeps*sizeof(timings));
 
-  if (opt.version == SERIAL)
-    time = serial_sweep(mpi, opt);
-  else if (opt.version == PARGROUP)
-    time = par_group_sweep(mpi, opt);
-  else if (opt.version == PARMPI)
-    time = par_mpi_sweep(mpi, opt);
-  else if (opt.version == MULTILOCK)
-    time = par_mpi_multi_lock_sweep(mpi, opt);
+  /* Run the benchmark multiple times */
+  for (int s = 0; s < opt.nsweeps; s++) {
+
+    if (opt.version == SERIAL)
+      times[s] = serial_sweep(mpi, opt);
+    else if (opt.version == PARGROUP)
+      times[s] = par_group_sweep(mpi, opt);
+    else if (opt.version == PARMPI)
+      times[s] = par_mpi_sweep(mpi, opt);
+    else if (opt.version == MULTILOCK)
+      times[s] = par_mpi_multi_lock_sweep(mpi, opt);
+  }
 
   if (mpi.rank == 0) {
-    print_timings(time);
+    print_timings(times[0]);
   }
+
+  free(times);
 
   MPI_Finalize();
 
