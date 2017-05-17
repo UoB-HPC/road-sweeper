@@ -16,6 +16,10 @@ The following options can be set:
 | `OMP`      | Set OpenMP library flag         |
 | `OPTIONS`  | Add additional compiler options |
 
+A preprocessor definition `WORK` can also be set to alter the effective computation delay between messages.
+The default value is 50 causing 50 floating point additions to be performed.
+The work routine represents the solution of a single point in the entire domain.
+
 ## Runtime options
 A number of options are passed on the command line.
 
@@ -46,6 +50,10 @@ The YZ spatial domain is as evenly as possible across the number of MPI ranks.
 Each rank contains the complete X domain, and is of size `nchunks * chunklen` cells.
 
 ## Sweep types
+A number of sweep types are investigated.
+Each is implemented in its own source file.
+Each sweeper is allowed to allocate the required MPI message buffer sizes, and any other initilisation it requires.
+
 ### Serial
 MPI only sweep with no OpenMP threading.
 One message is sent per chunk consisting of all the angles for the face cells for *a single* energy group.
