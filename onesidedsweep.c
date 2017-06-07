@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include "sweep.h"
 
-void init_one_sided_sweep(const int ycount, const int zcount, double **ybuf, double **zbuf, MPI_Win *ywin, MPI_Win *zwin);
-void end_one_sided_sweep(MPI_Win *ywin, MPI_Win *zwin);
+void init_one_sided_sweep(const int ycount, const int zcount, double **ybuf, double **zbuf, MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int yhi, const int zlo, const int zhi);
+void end_one_sided_sweep(MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int yhi, const int zlo, const int zhi);
 
 /* Perform a KBA sweep threading over groups inside the chunk */
 timings one_sided_sweep(mpistate mpi, options opt) {
@@ -42,7 +42,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
   double *ybuf;
   double *zbuf;
   MPI_Win ywin, zwin;
-  init_one_sided_sweep(ycount, zcount, &ybuf, &zbuf, &ywin, &zwin);
+  init_one_sided_sweep(ycount, zcount, &ybuf, &zbuf, &ywin, &zwin, mpi.ylo, mpi.yhi, mpi.zlo, mpi.zhi);
   time.setup = MPI_Wtime() - time.setup;
 
   /* Send requests */
@@ -115,24 +115,38 @@ timings one_sided_sweep(mpistate mpi, options opt) {
 
   time.sweeping = tock-tick;
 
-  end_one_sided_sweep(&ywin, &zwin);
+  end_one_sided_sweep(&ywin, &zwin, mpi.ylo, mpi.yhi, mpi.zlo, mpi.zhi);
 
   time.setup += MPI_Wtime() - tock;
 
   return time;
 }
 
-/* Allocate MPI message buffers */
-void init_one_sided_sweep(const int ycount, const int zcount, double **ybuf, double **zbuf, MPI_Win *ywin, MPI_Win *zwin) {
+/* Init MPI buffers and set up one-sided comms */
+void init_one_sided_sweep(const int ycount, const int zcount, double **ybuf, double **zbuf, MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int yhi, const int zlo, const int zhi) {
+  /* Allocate MPI message buffers */
   MPI_Info info;
   MPI_Info_create(&info);
   MPI_Info_set(info, "same_disp_unit", "true");
   MPI_Win_allocate(sizeof(double)*ycount, sizeof(double), info, MPI_COMM_WORLD, ybuf, ywin);
   MPI_Win_allocate(sizeof(double)*zcount, sizeof(double), info, MPI_COMM_WORLD, zbuf, zwin);
+
+  /* Start passive communication epoch - expose this rank's windows to its 4 neighbours */
+  MPI_Win_lock(MPI_LOCK_SHARED, ylo, 0, *ywin);
+  MPI_Win_lock(MPI_LOCK_SHARED, yhi, 0, *ywin);
+  MPI_Win_lock(MPI_LOCK_SHARED, zlo, 0, *zwin);
+  MPI_Win_lock(MPI_LOCK_SHARED, zhi, 0, *zwin);
 }
 
-/* Free MPI message buffers */
-void end_one_sided_sweep(MPI_Win *ywin, MPI_Win *zwin) {
+/* Finish up any MPI things */
+void end_one_sided_sweep(MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int yhi, const int zlo, const int zhi) {
+  /* End passive communication epoch */
+  MPI_Win_unlock(ylo, *ywin);
+  MPI_Win_unlock(yhi, *ywin);
+  MPI_Win_unlock(zlo, *zwin);
+  MPI_Win_unlock(zhi, *zwin);
+
+  /* Free MPI message buffers */
   MPI_Win_free(ywin);
   MPI_Win_free(zwin);
 }
