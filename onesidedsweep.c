@@ -62,6 +62,8 @@ timings one_sided_sweep(mpistate mpi, options opt) {
           /* Receive payload from upwind neighbours */
           double comtime = MPI_Wtime();
           if (j == 0) {
+            // TODO poll for sent signal
+            // do compute, or copy and send safe signal
             //MPI_Recv(ybuf, ycount, MPI_DOUBLE, mpi.yhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
           }
           else {
@@ -86,22 +88,26 @@ timings one_sided_sweep(mpistate mpi, options opt) {
 
           } /* End group loop */
 
-          /* Send payload to downwind neighbours */
+          // TODO if waiting for compute to send, send safe signal here.
+
+          /* Put (send) payload in downwind neighbours window */
           comtime = MPI_Wtime();
-          //MPI_Waitall(2, req, MPI_STATUS_IGNORE);
 
           if (j == 0) {
-            //MPI_Isend(ybuf, ycount, MPI_DOUBLE, mpi.ylo, 0, MPI_COMM_WORLD, req+0);
+            // TODO poll for safe to send
+            MPI_Put(ybuf, ycount, MPI_DOUBLE, mpi.ylo, 0, ycount, MPI_DOUBLE, ywin);
+            // TODO flush
+            // TODO send sent signal, and flush
           }
           else {
-            //MPI_Isend(ybuf, ycount, MPI_DOUBLE, mpi.yhi, 0, MPI_COMM_WORLD, req+0);
+            MPI_Put(ybuf, ycount, MPI_DOUBLE, mpi.yhi, 0, ycount, MPI_DOUBLE, ywin);
           }
 
           if (k == 0) {
-            //MPI_Isend(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, MPI_COMM_WORLD, req+1);
+            MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, zcount, MPI_DOUBLE, zwin);
           }
           else {
-            //MPI_Isend(zbuf, zcount, MPI_DOUBLE, mpi.zhi, 0, MPI_COMM_WORLD, req+1);
+            MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zhi, 0, zcount, MPI_DOUBLE, zwin);
           }
           time.comms += MPI_Wtime() - comtime;
 
