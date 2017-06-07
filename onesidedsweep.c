@@ -26,7 +26,25 @@
 void init_one_sided_sweep(const int ycount, const int zcount, double **ybuf, double **zbuf, MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int yhi, const int zlo, const int zhi);
 void end_one_sided_sweep(MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int yhi, const int zlo, const int zhi);
 
-/* Perform a KBA sweep threading over groups inside the chunk */
+/* Perform a KBA sweep threading over groups inside the chunk
+ *
+ * This method uses the one-sided RMA MPI communication pattern,
+ * with _passive_ synchronisation.
+ * A window is created on each MPI rank.
+ * Shared locks created on this window for neighbouring processors.
+ * The sweep goes in all directions, and so therefore this lock is shared
+ * rather than exclusive as each rank has two neighbours which may write
+ * to the buffer dependent on the sweep direction.
+ * Signals are used to synchronise between ranks.
+ * The send protocol is therefore:
+ *   1. Poll for safe signal
+ *   2. MPI_Put payload + MPI_Flush
+ *   3. Put done signal + MPI_Flush
+ * The receive protocol is therefore:
+ *   1. Poll for done signal
+ *   2. Use data
+ *   3. Put safe signal + MPI_Flush
+ */
 timings one_sided_sweep(mpistate mpi, options opt) {
 
   timings time = {
