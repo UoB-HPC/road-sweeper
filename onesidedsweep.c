@@ -115,7 +115,23 @@ timings one_sided_sweep(mpistate mpi, options opt) {
           }
 
           if (k == 0) {
-            //MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            /* Do comms if internal boundary */
+            if (mpi.zhi != MPI_PROC_NULL) {
+              /* Send safe signal */
+              zbuf[zcount+SAFE_OFFSET] = SAFE_SIGNAL;
+              MPI_Put(zbuf+zcount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.zhi, 0, 1, MPI_DOUBLE, zwin);
+              MPI_Win_flush(mpi.zhi, zwin);
+
+              /* Poll for sent signal */
+              int sent = 0;
+              while (!sent) {
+                if (zbuf[zcount+SENT_OFFSET] == SENT_SIGNAL)
+                  sent = 1;
+              }
+
+              /* Reset signal */
+              zbuf[zcount+SENT_OFFSET] = NULL_SIGNAL;
+            }
           }
           else {
             //MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zlo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -159,6 +175,24 @@ timings one_sided_sweep(mpistate mpi, options opt) {
           }
 
           if (k == 0) {
+            /* Do comms if internal boundary */
+            if (mpi.zlo != MPI_PROC_NULL) {
+              /* Poll for safe to send */
+              int safe = 0;
+              while (!safe) {
+                if (zbuf[zcount+SAFE_OFFSET] == SAFE_SIGNAL)
+                  safe = 1;
+              }
+
+              /* Put payload */
+              MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, zcount, MPI_DOUBLE, zwin);
+              MPI_Win_flush(mpi.zlo, zwin);
+
+              /* Send sent signal */
+              zbuf[zcount+SENT_OFFSET] = SENT_SIGNAL;
+              MPI_Put(zbuf+zcount+SENT_OFFSET, 1, MPI_DOUBLE, mpi.zlo, 0, 1, MPI_DOUBLE, zwin);
+              MPI_Win_flush(mpi.zlo, zwin);
+            }
             //MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, zcount, MPI_DOUBLE, zwin);
           }
           else {
