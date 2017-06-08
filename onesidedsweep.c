@@ -45,6 +45,14 @@ void end_one_sided_sweep(MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int 
  *   2. Use data
  *   3. Put safe signal + MPI_Flush
  */
+
+#define SAFE_SIGNAL 123456789.0
+#define SENT_SIGNAL 987654321.0
+#define NULL_SIGNAL -1.0
+/* Offsets from the main array where the signals can be found */
+#define SAFE_OFFSET 0
+#define SENT_OFFSET 1
+
 timings one_sided_sweep(mpistate mpi, options opt) {
 
   timings time = {
@@ -80,9 +88,30 @@ timings one_sided_sweep(mpistate mpi, options opt) {
           /* Receive payload from upwind neighbours */
           double comtime = MPI_Wtime();
           if (j == 0) {
-            // TODO poll for sent signal
-            // do compute, or copy and send safe signal
-            //MPI_Recv(ybuf, ycount, MPI_DOUBLE, mpi.yhi, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            /* Send safe signal */
+            if (mpi.yhi != MPI_PROC_NULL) {
+              printf("%d: put safe signal\n", mpi.rank);
+              ybuf[ycount+SAFE_OFFSET] = SAFE_SIGNAL;
+              MPI_Put(ybuf+ycount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.yhi, 0, 1, MPI_DOUBLE, ywin);
+              MPI_Win_flush(mpi.yhi, ywin);
+              printf("%d: flush safe signal\n", mpi.rank);
+            }
+
+            //MPI_Win_unlock(mpi.rank, ywin);
+            printf("%d: start sent poll\n", mpi.rank);
+            /* Poll for sent signal */
+            int sent = 0;
+            if (mpi.yhi == MPI_PROC_NULL) sent = 1;
+            //MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, ywin);
+            // TODO check if on a boundary for this sweep, and no need to poll if so...
+            while (!sent) {
+              if (ybuf[ycount+SENT_OFFSET] == SENT_SIGNAL)
+                sent = 1;
+            }
+            printf("%d: end sent poll\n", mpi.rank);
+            /* Reset signal */
+            ybuf[ycount+SENT_OFFSET] == NULL_SIGNAL;
+            //MPI_Win_unlock(mpi.rank, ywin);
           }
           else {
             //MPI_Recv(ybuf, ycount, MPI_DOUBLE, mpi.ylo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -106,26 +135,37 @@ timings one_sided_sweep(mpistate mpi, options opt) {
 
           } /* End group loop */
 
-          // TODO if waiting for compute to send, send safe signal here.
-
           /* Put (send) payload in downwind neighbours window */
           comtime = MPI_Wtime();
 
           if (j == 0) {
-            // TODO poll for safe to send
-            MPI_Put(ybuf, ycount, MPI_DOUBLE, mpi.ylo, 0, ycount, MPI_DOUBLE, ywin);
-            // TODO flush
-            // TODO send sent signal, and flush
+            printf("%d: start safe poll\n", mpi.rank);
+            if (mpi.ylo != MPI_PROC_NULL) {
+              /* Poll for safe to send */
+              int safe = 0;
+              while (!safe) {
+                if (ybuf[ycount+SAFE_OFFSET] == SAFE_SIGNAL)
+                  safe = 1;
+              }
+              printf("%d: putting to %d\n", mpi.rank, mpi.ylo);
+              MPI_Put(ybuf, ycount, MPI_DOUBLE, mpi.ylo, 0, ycount, MPI_DOUBLE, ywin);
+              MPI_Win_flush(mpi.ylo, ywin);
+              /* Send sent signal, and flush */
+              ybuf[ycount+SENT_OFFSET] = SENT_SIGNAL;
+              printf("%d: putting sent signal for %d\n", mpi.rank, mpi.ylo);
+              MPI_Put(ybuf+ycount+SENT_OFFSET, 1, MPI_DOUBLE, mpi.ylo, 0, 1, MPI_DOUBLE, ywin);
+              MPI_Win_flush(mpi.ylo, ywin);
+            }
           }
           else {
-            MPI_Put(ybuf, ycount, MPI_DOUBLE, mpi.yhi, 0, ycount, MPI_DOUBLE, ywin);
+            //MPI_Put(ybuf, ycount, MPI_DOUBLE, mpi.yhi, 0, ycount, MPI_DOUBLE, ywin);
           }
 
           if (k == 0) {
-            MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, zcount, MPI_DOUBLE, zwin);
+            //MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, zcount, MPI_DOUBLE, zwin);
           }
           else {
-            MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zhi, 0, zcount, MPI_DOUBLE, zwin);
+            //MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zhi, 0, zcount, MPI_DOUBLE, zwin);
           }
           time.comms += MPI_Wtime() - comtime;
 
@@ -148,12 +188,13 @@ timings one_sided_sweep(mpistate mpi, options opt) {
 
 /* Init MPI buffers and set up one-sided comms */
 void init_one_sided_sweep(const int ycount, const int zcount, double **ybuf, double **zbuf, MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int yhi, const int zlo, const int zhi) {
-  /* Allocate MPI message buffers */
+  /* Allocate MPI window buffer*/
   MPI_Info info;
   MPI_Info_create(&info);
   MPI_Info_set(info, "same_disp_unit", "true");
-  MPI_Win_allocate(sizeof(double)*ycount, sizeof(double), info, MPI_COMM_WORLD, ybuf, ywin);
-  MPI_Win_allocate(sizeof(double)*zcount, sizeof(double), info, MPI_COMM_WORLD, zbuf, zwin);
+  /* Size of payload plus 2 values to allow for safe and done signals */
+  MPI_Win_allocate(sizeof(double)*(ycount+2), sizeof(double), info, MPI_COMM_WORLD, ybuf, ywin);
+  MPI_Win_allocate(sizeof(double)*(zcount+2), sizeof(double), info, MPI_COMM_WORLD, zbuf, zwin);
 
   /* Start passive communication epoch - expose this rank's windows to its 4 neighbours */
   MPI_Win_lock(MPI_LOCK_SHARED, ylo, 0, *ywin);
