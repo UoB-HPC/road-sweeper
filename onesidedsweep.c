@@ -41,9 +41,9 @@ void end_one_sided_sweep(MPI_Win *ywin, MPI_Win *zwin, const int ylo, const int 
  *   2. MPI_Put payload + MPI_Flush
  *   3. Put done signal + MPI_Flush
  * The receive protocol is therefore:
- *   1. Poll for done signal
- *   2. Use data
- *   3. Put safe signal + MPI_Flush
+ *   1. Put safe signal + MPI_Flush
+ *   2. Poll for done signal
+ *   3. Use data
  */
 
 #define SAFE_SIGNAL 123456789.0
@@ -88,30 +88,27 @@ timings one_sided_sweep(mpistate mpi, options opt) {
           /* Receive payload from upwind neighbours */
           double comtime = MPI_Wtime();
           if (j == 0) {
-            /* Send safe signal */
+            /* Do comms if internal boundary */
             if (mpi.yhi != MPI_PROC_NULL) {
+              /* Send safe signal */
               printf("%d: put safe signal\n", mpi.rank);
               ybuf[ycount+SAFE_OFFSET] = SAFE_SIGNAL;
               MPI_Put(ybuf+ycount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.yhi, 0, 1, MPI_DOUBLE, ywin);
               MPI_Win_flush(mpi.yhi, ywin);
               printf("%d: flush safe signal\n", mpi.rank);
-            }
 
-            //MPI_Win_unlock(mpi.rank, ywin);
-            printf("%d: start sent poll\n", mpi.rank);
-            /* Poll for sent signal */
-            int sent = 0;
-            if (mpi.yhi == MPI_PROC_NULL) sent = 1;
-            //MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, ywin);
-            // TODO check if on a boundary for this sweep, and no need to poll if so...
-            while (!sent) {
-              if (ybuf[ycount+SENT_OFFSET] == SENT_SIGNAL)
-                sent = 1;
+              printf("%d: start sent poll\n", mpi.rank);
+              /* Poll for sent signal */
+              int sent = 0;
+              while (!sent) {
+                if (ybuf[ycount+SENT_OFFSET] == SENT_SIGNAL)
+                  sent = 1;
+              }
+              printf("%d: end sent poll\n", mpi.rank);
+
+              /* Reset signal */
+              ybuf[ycount+SENT_OFFSET] == NULL_SIGNAL;
             }
-            printf("%d: end sent poll\n", mpi.rank);
-            /* Reset signal */
-            ybuf[ycount+SENT_OFFSET] == NULL_SIGNAL;
-            //MPI_Win_unlock(mpi.rank, ywin);
           }
           else {
             //MPI_Recv(ybuf, ycount, MPI_DOUBLE, mpi.ylo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
