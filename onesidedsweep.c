@@ -121,14 +121,18 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               printf("%d: k=0 send safe signal to %d\n", mpi.rank, mpi.zhi);
               zbuf[zcount+SAFE_OFFSET] = SAFE_SIGNAL;
               MPI_Put(zbuf+zcount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.zhi, zcount+SAFE_OFFSET, 1, MPI_DOUBLE, zwin);
-              MPI_Win_flush_all(zwin);
+              MPI_Win_flush(mpi.zhi, zwin);
 
               /* Poll for sent signal */
               printf("%d: k=0 sent poll start\n", mpi.rank);
               int sent = 0;
               while (!sent) {
+                MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, zwin);
                 if (zbuf[zcount+SENT_OFFSET] == SENT_SIGNAL)
                   sent = 1;
+                MPI_Win_unlock(mpi.rank, zwin);
+                printf("%d: received zbuf@%d=%lf\n", mpi.rank, zcount+SENT_OFFSET, zbuf[zcount+SENT_OFFSET]);
+                sleep(1);
               }
               printf("%d: k=0 sent poll end\n", mpi.rank);
 
@@ -140,6 +144,8 @@ timings one_sided_sweep(mpistate mpi, options opt) {
             //MPI_Recv(zbuf, zcount, MPI_DOUBLE, mpi.zlo, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
           }
           time.comms += MPI_Wtime() - comtime;
+
+          printf("%d: COMPUTING\n", mpi.rank);
 
           #pragma omp parallel for
           for (int g = 0; g < opt.ng; g++) {
@@ -187,18 +193,22 @@ timings one_sided_sweep(mpistate mpi, options opt) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, zwin);
                 if (zbuf[zcount+SAFE_OFFSET] == SAFE_SIGNAL)
                   safe = 1;
-                printf("%d: received signal %lf\n", mpi.rank, zbuf[zcount+SAFE_OFFSET]);
                 MPI_Win_unlock(mpi.rank, zwin);
-                sleep(1);
               }
               printf("%d: k=0 safe poll end\n", mpi.rank);
 
+              /* Reset signal */
+              zbuf[zcount+SAFE_OFFSET] = NULL_SIGNAL;
+
               /* Put payload */
+              printf("%d: k=0 put to %d\n", mpi.rank, mpi.zlo);
               MPI_Put(zbuf, zcount, MPI_DOUBLE, mpi.zlo, 0, zcount, MPI_DOUBLE, zwin);
               MPI_Win_flush(mpi.zlo, zwin);
 
               /* Send sent signal */
+              printf("%d: k=0 send sent signal to %d\n", mpi.rank, mpi.zlo);
               zbuf[zcount+SENT_OFFSET] = SENT_SIGNAL;
+              printf("%d: zbuf@%d=%lf\n", mpi.rank, zcount+SENT_OFFSET, zbuf[zcount+SENT_OFFSET]);
               MPI_Put(zbuf+zcount+SENT_OFFSET, 1, MPI_DOUBLE, mpi.zlo, zcount+SENT_OFFSET, 1, MPI_DOUBLE, zwin);
               MPI_Win_flush(mpi.zlo, zwin);
             }
