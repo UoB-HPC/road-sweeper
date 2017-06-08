@@ -89,6 +89,7 @@ int main(int argc, char *argv[]) {
     decompose(&mpi);
     opt.gny = mpi.npey*opt.ny;
     opt.gnz = mpi.npez*opt.nz;
+    printf("Rank %d: ylo %d yhi %d, zlo %d, zhi %d\n", mpi.rank, mpi.ylo, mpi.yhi, mpi.zlo, mpi.zhi);
   }
 
   /* Print runtime options */
