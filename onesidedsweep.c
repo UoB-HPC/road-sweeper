@@ -201,6 +201,12 @@ void init_one_sided_sweep(const int ycount, const int zcount, double **ybuf, dou
   MPI_Win_lock(MPI_LOCK_SHARED, yhi, 0, *ywin);
   MPI_Win_lock(MPI_LOCK_SHARED, zlo, 0, *zwin);
   MPI_Win_lock(MPI_LOCK_SHARED, zhi, 0, *zwin);
+
+  /* Reset the signal */
+  (*ybuf)[ycount+SAFE_OFFSET] = NULL_SIGNAL;
+  (*ybuf)[ycount+SENT_OFFSET] = NULL_SIGNAL;
+  (*zbuf)[ycount+SAFE_OFFSET] = NULL_SIGNAL;
+  (*zbuf)[ycount+SENT_OFFSET] = NULL_SIGNAL;
 }
 
 /* Finish up any MPI things */
