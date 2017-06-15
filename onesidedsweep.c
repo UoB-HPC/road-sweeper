@@ -102,7 +102,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               fprintf(fp,"%d: oct %d recv from %d j=0\n", mpi.rank, oct, mpi.yhi);
         fflush(fp);
               /* Send safe signal */
-              ybuf[ycount+SAFE_OFFSET] = SAFE_SIGNAL;
+              ybuf[ycount+SAFE_OFFSET] = SAFE_SIGNAL+oct;
               MPI_Put(ybuf+ycount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.yhi, ycount+SAFE_OFFSET, 1, MPI_DOUBLE, ywin);
               MPI_Win_flush(mpi.yhi, ywin);
 
@@ -127,7 +127,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               fprintf(fp,"%d: oct %d recv from %d j/=0\n", mpi.rank, oct, mpi.ylo);
         fflush(fp);
               /* Send safe signal */
-              ybuf[ycount+SAFE_OFFSET] = SAFE_SIGNAL;
+              ybuf[ycount+SAFE_OFFSET] = SAFE_SIGNAL+oct;
               MPI_Put(ybuf+ycount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.ylo, ycount+SAFE_OFFSET, 1, MPI_DOUBLE, ywin);
               MPI_Win_flush(mpi.ylo, ywin);
 
@@ -152,7 +152,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               fprintf(fp,"%d: oct %d recv from %d k=0\n", mpi.rank, oct, mpi.zhi);
         fflush(fp);
               /* Send safe signal */
-              zbuf[zcount+SAFE_OFFSET] = SAFE_SIGNAL;
+              zbuf[zcount+SAFE_OFFSET] = SAFE_SIGNAL+oct;
               MPI_Put(zbuf+zcount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.zhi, zcount+SAFE_OFFSET, 1, MPI_DOUBLE, zwin);
               MPI_Win_flush(mpi.zhi, zwin);
 
@@ -177,7 +177,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               fprintf(fp,"%d: oct %d recv from %d k/=0\n", mpi.rank, oct, mpi.zlo);
         fflush(fp);
               /* Send safe signal */
-              zbuf[zcount+SAFE_OFFSET] = SAFE_SIGNAL;
+              zbuf[zcount+SAFE_OFFSET] = SAFE_SIGNAL+oct;
               MPI_Put(zbuf+zcount+SAFE_OFFSET, 1, MPI_DOUBLE, mpi.zlo, zcount+SAFE_OFFSET, 1, MPI_DOUBLE, zwin);
               MPI_Win_flush(mpi.zlo, zwin);
 
@@ -231,7 +231,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int safe = 0;
               while (!safe) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, ywin);
-                if (ybuf[ycount+SAFE_OFFSET] == SAFE_SIGNAL)
+                if (ybuf[ycount+SAFE_OFFSET] == SAFE_SIGNAL+oct)
                   safe = 1;
                 MPI_Win_unlock(mpi.rank, ywin);
               }
@@ -260,7 +260,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int safe = 0;
               while (!safe) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, ywin);
-                if (ybuf[ycount+SAFE_OFFSET] == SAFE_SIGNAL)
+                if (ybuf[ycount+SAFE_OFFSET] == SAFE_SIGNAL+oct)
                   safe = 1;
                 MPI_Win_unlock(mpi.rank, ywin);
               }
@@ -289,7 +289,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int safe = 0;
               while (!safe) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, zwin);
-                if (zbuf[zcount+SAFE_OFFSET] == SAFE_SIGNAL)
+                if (zbuf[zcount+SAFE_OFFSET] == SAFE_SIGNAL+oct)
                   safe = 1;
                 MPI_Win_unlock(mpi.rank, zwin);
               }
@@ -318,7 +318,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int safe = 0;
               while (!safe) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, zwin);
-                if (zbuf[zcount+SAFE_OFFSET] == SAFE_SIGNAL)
+                if (zbuf[zcount+SAFE_OFFSET] == SAFE_SIGNAL+oct)
                   safe = 1;
                 MPI_Win_unlock(mpi.rank, zwin);
               }
