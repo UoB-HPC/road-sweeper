@@ -110,7 +110,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int sent = 0;
               while (!sent) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, ywin);
-                if (ybuf[ycount+SENT_OFFSET] == SENT_SIGNAL)
+                if (ybuf[ycount+SENT_OFFSET] == SENT_SIGNAL+oct)
                   sent = 1;
                 MPI_Win_unlock(mpi.rank, ywin);
               }
@@ -135,7 +135,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int sent = 0;
               while (!sent) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, ywin);
-                if (ybuf[ycount+SENT_OFFSET] == SENT_SIGNAL)
+                if (ybuf[ycount+SENT_OFFSET] == SENT_SIGNAL+oct)
                   sent = 1;
                 MPI_Win_unlock(mpi.rank, ywin);
               }
@@ -160,7 +160,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int sent = 0;
               while (!sent) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, zwin);
-                if (zbuf[zcount+SENT_OFFSET] == SENT_SIGNAL)
+                if (zbuf[zcount+SENT_OFFSET] == SENT_SIGNAL+oct)
                   sent = 1;
                 MPI_Win_unlock(mpi.rank, zwin);
               }
@@ -185,7 +185,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               int sent = 0;
               while (!sent) {
                 MPI_Win_lock(MPI_LOCK_SHARED, mpi.rank, 0, zwin);
-                if (zbuf[zcount+SENT_OFFSET] == SENT_SIGNAL)
+                if (zbuf[zcount+SENT_OFFSET] == SENT_SIGNAL+oct)
                   sent = 1;
                 MPI_Win_unlock(mpi.rank, zwin);
               }
@@ -244,7 +244,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               MPI_Win_flush(mpi.ylo, ywin);
 
               /* Send sent signal */
-              ybuf[ycount+SENT_OFFSET] = SENT_SIGNAL;
+              ybuf[ycount+SENT_OFFSET] = SENT_SIGNAL+oct;
               MPI_Put(ybuf+ycount+SENT_OFFSET, 1, MPI_DOUBLE, mpi.ylo, ycount+SENT_OFFSET, 1, MPI_DOUBLE, ywin);
               MPI_Win_flush(mpi.ylo, ywin);
               MPI_Win_flush(mpi.rank, ywin);
@@ -273,7 +273,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               MPI_Win_flush(mpi.yhi, ywin);
 
               /* Send sent signal */
-              ybuf[ycount+SENT_OFFSET] = SENT_SIGNAL;
+              ybuf[ycount+SENT_OFFSET] = SENT_SIGNAL+oct;
               MPI_Put(ybuf+ycount+SENT_OFFSET, 1, MPI_DOUBLE, mpi.yhi, ycount+SENT_OFFSET, 1, MPI_DOUBLE, ywin);
               MPI_Win_flush(mpi.yhi, ywin);
               MPI_Win_flush(mpi.rank, ywin);
@@ -302,7 +302,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               MPI_Win_flush(mpi.zlo, zwin);
 
               /* Send sent signal */
-              zbuf[zcount+SENT_OFFSET] = SENT_SIGNAL;
+              zbuf[zcount+SENT_OFFSET] = SENT_SIGNAL+oct;
               MPI_Put(zbuf+zcount+SENT_OFFSET, 1, MPI_DOUBLE, mpi.zlo, zcount+SENT_OFFSET, 1, MPI_DOUBLE, zwin);
               MPI_Win_flush(mpi.zlo, zwin);
               MPI_Win_flush(mpi.rank, zwin);
@@ -331,7 +331,7 @@ timings one_sided_sweep(mpistate mpi, options opt) {
               MPI_Win_flush(mpi.zhi, zwin);
 
               /* Send sent signal */
-              zbuf[zcount+SENT_OFFSET] = SENT_SIGNAL;
+              zbuf[zcount+SENT_OFFSET] = SENT_SIGNAL+oct;
               MPI_Put(zbuf+zcount+SENT_OFFSET, 1, MPI_DOUBLE, mpi.zhi, zcount+SENT_OFFSET, 1, MPI_DOUBLE, zwin);
               MPI_Win_flush(mpi.zhi, zwin);
               MPI_Win_flush(mpi.rank, zwin);
